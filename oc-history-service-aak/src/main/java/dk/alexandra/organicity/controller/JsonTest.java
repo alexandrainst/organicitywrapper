@@ -1,4 +1,4 @@
-package dk.alexandra.organicity;
+package dk.alexandra.organicity.controller;
 
 import java.io.IOException;
 import java.io.OutputStream;

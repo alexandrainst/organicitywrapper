@@ -1,4 +1,4 @@
-package dk.alexandra.organicity;
+package dk.alexandra.organicity.controller;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -7,10 +7,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Root resource (exposed at "myresource" path)
+ * Rest Service to return datasources (aka resources/entities) and readings
  */
-@Path("organicity")
-public class MyResource {
+@Path("v1")
+public class DataSourceController {
 
     /**
      * Method handling HTTP GET requests. The returned object will be sent
@@ -28,15 +28,15 @@ public class MyResource {
     
     @GET
     @Path("/entities")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getAllCustomers() {
-      return "---Customer List---";
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getDataSources() {
+      return "---Source List---";
     }
     
     @GET
     @Path("/entities/{id}/readings")
     @Produces(MediaType.TEXT_PLAIN)
-    public long getCustomer(@PathParam("id") long id) {
+    public long getReadings(@PathParam("id") long id) {
       return id;
     }
 }
