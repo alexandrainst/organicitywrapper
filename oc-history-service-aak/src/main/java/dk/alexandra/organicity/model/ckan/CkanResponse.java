@@ -1,21 +1,13 @@
 package dk.alexandra.organicity.model.ckan;
 
-import java.util.List;
-import java.util.Map;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import org.codehaus.jackson.JsonParser;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CkanResponse {
-	public boolean success;
-	public List<Field> fields;
-	public List<Map<String, Object>> records;
+	public boolean success; //was the request succesfull
+	public Result result; //the result 
+	public int total; //number of rows in db
+	
+	public CkanResponse() { } //for json (de-)serialization
 
-	
-	public CkanResponse(boolean success, List<Field> fields,
-			List<Map<String, Object>> records) {
-		this.success = success;
-		this.fields = fields;
-		this.records = records;
-	}
-	
 }

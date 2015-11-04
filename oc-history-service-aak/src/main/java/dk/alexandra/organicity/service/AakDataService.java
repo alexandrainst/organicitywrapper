@@ -9,6 +9,7 @@ import java.util.Set;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import dk.alexandra.organicity.model.ckan.CkanResponse;
 import dk.alexandra.organicity.model.organicity.Device;
 import dk.alexandra.organicity.model.organicity.DeviceData;
 import dk.alexandra.organicity.model.organicity.DeviceOwner;
@@ -22,32 +23,21 @@ public class AakDataService {
 		s += resourceId;
 		return s;
 	}
-	private String getUrl(String resourceId, int limit) {
+	private String getUrl(String resourceId, int offset, int limit) {
 		String s = getUrl(resourceId);
-		s += "&limit=" + limit;
+		s += "&offset=" + offset + "&limit=" + limit;
 		return s;
 	}
-	
+
 	private DeviceOwner getAarhusOwner() {
 		return new DeviceOwner(2, "urn:oc:entity:aarhus","urn:oc:entity:aarhus", 
 				"http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",  "https://en.wikipedia.org/wiki/Aarhus",
 				"",  new Location("Aarhus", "Danmark", "DK"));
 	}
-	@SuppressWarnings("unchecked")
+
 	public List<Device> getEntities() throws IOException {
-		JsonParser jp = GetJson.get(getUrl("_table_metadata", 200));
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> d = mapper.readValue(jp, Map.class);
-		if (!d.containsKey("success"))
-			throw new IOException("failed to read metadata from request");
-		boolean dd = (Boolean) d.get("success");
-		if (!dd)
-			throw new IOException("read metadata failed at source");	
-		d = (Map<String, Object>) d.get("result");
-		List<Object> list = (List<Object>) d.get("records");
-		List<Device> res = new ArrayList<Device>();
-		for (Object o : list) {
-			Map<String, Object> rec = (Map<String, Object>) o;
+		CkanResponse response = getCkanEntities();
+		for (Map<String, Object> rec : response.result.records) {
 			String source_uuid = (String) rec.get("name"); 
 			if (source_uuid.equals("76d1ee61-8062-42d9-b417-fac75998f5c3")) {
 				//tomming
@@ -59,19 +49,26 @@ public class AakDataService {
 				DeviceData data = getLastMeasurement(source_uuid);
 			}
 		}
-		return res;
+		return null;
+	}
+
+	private CkanResponse getCkanResponse(String url) throws IOException {
+		JsonParser jp = GetJson.get(url);
+		ObjectMapper mapper = new ObjectMapper();
+		CkanResponse response = mapper.readValue(jp,  CkanResponse.class);
+		if (!response.success)
+			throw new IOException("request failed");
+		return response;
+	}
+	
+	public CkanResponse getCkanEntities() throws IOException {
+		return getCkanResponse(getUrl("_table_metadata", 0, 200));
 	}
 	private DeviceData getLastMeasurement(String source_uuid) throws IOException {
-		JsonParser jp = GetJson.get(getUrl(source_uuid, 2));
+		CkanResponse ckan =  getCkanResponse(getUrl(source_uuid, 0, 2));
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> d = mapper.readValue(jp, Map.class);
-		if (!d.containsKey("success"))
-			throw new IOException("failed to read metadata from request");
-		boolean dd = (Boolean) d.get("success");
-		if (!dd)
-			throw new IOException("read metadata failed at source");	
 		DeviceData res = new DeviceData(DateFormatter.getCurrentTime(), null);
-		
+
 		return null;
 	}
 }

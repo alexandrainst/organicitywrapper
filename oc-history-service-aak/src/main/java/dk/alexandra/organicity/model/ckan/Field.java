@@ -20,11 +20,12 @@ public class Field {
 		return tt.toString();
 	}
 	
-	public Type type;
+	public String type;
 	public String id;
 
-	public Field(Type type, String id) {
+	public Field(String type, String id) {
 		this.type = type;
 		this.id = id;
 	}
+	public Field() { } //for json (de-)serialization
 }
