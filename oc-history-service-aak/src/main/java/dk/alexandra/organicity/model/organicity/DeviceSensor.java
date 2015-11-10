@@ -11,7 +11,8 @@ public class DeviceSensor implements Serializable {
     public String name;
     public String unit;
     public String updated_at;
-    public String metadata_id;
+    //public String metadata_id; removed from this copy
+    public String attributes_id;
     public double value;
     public double prev_value;
 }

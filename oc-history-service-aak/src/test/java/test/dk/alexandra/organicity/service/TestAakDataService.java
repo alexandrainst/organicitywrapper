@@ -24,7 +24,7 @@ public class TestAakDataService {
 		assertTrue("succes was not set", response.success);
 		assertTrue("result was not set", response.result!=null);
 		assertTrue("fields was not set", response.result.fields!=null);
-		assertEquals("fields had wrong length", response.result.fields.size(), 4);
-		assertEquals("results had wrong length", response.result.records.size(), 172); //This may change in the future...
+		assertEquals("fields had wrong length", 4, response.result.fields.size());
+		assertEquals("results had wrong length", 173, response.result.records.size()); //This may change in the future...
 	}
 }
