@@ -15,4 +15,6 @@ public class DeviceSensor implements Serializable {
     public String attributes_id;
     public double value;
     public double prev_value;
+    
+    public DeviceSensor() {}
 }

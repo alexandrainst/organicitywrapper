@@ -27,4 +27,6 @@ public class DeviceOwner implements Serializable {
     	this.location = location;
     }
     
+    public DeviceOwner() {}
+    
 }

@@ -14,4 +14,6 @@ public class Kit implements Serializable {
     public String description;
     public String created_at;
     public String updated_at;
+    
+    public Kit() {}
 }

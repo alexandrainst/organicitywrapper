@@ -1,18 +1,28 @@
 package dk.alexandra.organicity;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import dk.alexandra.organicity.controller.Main;
-import static org.junit.Assert.assertEquals;
+import dk.alexandra.organicity.model.organicity.Device;
 
-public class MyResourceTest {
+public class ServiceTest {
 
     private HttpServer server;
     private WebTarget target;
@@ -35,15 +45,18 @@ public class MyResourceTest {
 
     @After
     public void tearDown() throws Exception {
-        server.stop();
+        server.shutdown();
     }
 
-    /**
-     * Test to see that the message "Got it!" is sent in the response.
-     */
     @Test
-    public void testGetIt() {
-        String responseMsg = target.path("myresource").request().get(String.class);
-        assertEquals("Got it!", responseMsg);
+    public void testGetEntitites() throws JsonParseException, JsonMappingException, IOException {
+      InputStream in = target.path("v1/entities").request().get(InputStream.class);
+      ObjectMapper m = new ObjectMapper();
+      List<Device> devices = m.readValue(in, new TypeReference<List<Device>>() { });
+      assertTrue(devices!=null);
+    }
+    @Test
+    public void testGetEntititesPrintOutput() throws JsonParseException, JsonMappingException, IOException {
+      System.out.println(target.path("v1/entities").request().get(String.class));
     }
 }

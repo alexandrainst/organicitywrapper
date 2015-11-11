@@ -19,4 +19,5 @@ public class DeviceData implements Serializable {
     	this.attributes = new ArrayList<DeviceSensor>();
     }
 
+    public DeviceData() {}
 }

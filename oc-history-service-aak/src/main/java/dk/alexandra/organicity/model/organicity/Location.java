@@ -16,4 +16,6 @@ public class Location implements Serializable {
     	this.country = country;
     	this.country_code = country_code;
     }
+    
+    public Location() {}
 }

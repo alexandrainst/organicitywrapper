@@ -20,5 +20,7 @@ public class Device implements Serializable {
     	this.uuid = uuid;
     	this.name = uuid;
     }
+    
+    public Device() {}
 }
 

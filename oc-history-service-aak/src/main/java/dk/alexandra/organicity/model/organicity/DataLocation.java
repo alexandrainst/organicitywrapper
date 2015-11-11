@@ -17,5 +17,7 @@ public class DataLocation implements Serializable {
     	this.latitude = latitude;
     	this.longitude = longitude;
 	}
+    
+    public DataLocation() {}
 
 }

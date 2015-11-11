@@ -1,18 +1,24 @@
 package test.dk.alexandra.organicity.service;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import dk.alexandra.organicity.model.ckan.CkanResponse;
+import dk.alexandra.organicity.model.organicity.Device;
+import dk.alexandra.organicity.service.AakDataService;
 
 public class TestJson {
 
@@ -48,5 +54,18 @@ public class TestJson {
 		assertEquals("fields had wrong length", response.result.fields.size(), 4);
 		assertEquals("results had wrong length", response.result.records.size(), 2);
 		assertEquals("results[0] had wrong value", response.result.records.get(0).get("_id"), "0661bc9e79befc2d");
+	}
+	
+	@Test
+	public void testList2Json() throws JsonGenerationException, JsonMappingException, IOException {
+	  List<Device> list = new ArrayList<Device>();
+	  AakDataService s = new AakDataService();
+    
+	  Device d = new Device(1, "1", "1");
+	  d.data = s.getLastMeasurementImpl(s.getTestCkanResponse());
+	  list.add(d);
+	  ObjectMapper mapper = new ObjectMapper();
+    String js = mapper.writeValueAsString(list);
+    System.out.println(js);
 	}
 }
