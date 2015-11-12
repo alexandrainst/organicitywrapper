@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class TestJson {
 	}
 	
 	@Test
-	public void testList2Json() throws JsonGenerationException, JsonMappingException, IOException {
+	public void testList2Json() throws JsonGenerationException, JsonMappingException, IOException, ParseException {
 	  List<Device> list = new ArrayList<Device>();
 	  AakDataService s = new AakDataService();
     

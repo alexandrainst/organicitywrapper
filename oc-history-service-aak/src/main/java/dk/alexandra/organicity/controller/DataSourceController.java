@@ -43,28 +43,65 @@ public class DataSourceController {
       ObjectMapper m = new ObjectMapper();
       return m.writeValueAsString(devices);
     }
-    //TODO: check null in id.
-    //check output in general
+    //TODO:
     //get correct data from ODAA
     //why are there only 3 attributes - check your conversion alg
+    //refactor service comp too big
     //add javadoc to all public facing functions
     //cache?
     //tomcat deployment?
+    //Z in timestamps - (java means output timezone, but this is not what OC does)
+    //is the initial [ ok in the output?
     /* Example output
      * [
-     * {"id":8063,
-     * "uuid":"null76d1ee61-8062-42d9-b417-fac75998f5c3:1",
-     * "name":"null76d1ee61-8062-42d9-b417-fac75998f5c3:1",
-     * "last_reading_at":"2015-11-11T16:53+0100",
-     * "provider":{"id":2,"uuid":null,"username":"urn:oc:entity:aarhus","avatar":"http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg","url":"https://en.wikipedia.org/wiki/Aarhus","joined_at":"","location":{"city":"Aarhus","country":"Danmark","country_code":"DK"},"device_ids":null},
-     * "data":{"recorded_at":"2015-11-11T16:53+0100","location":{"latitude":56.12,"longitude":10.2,"city":null,"country_code":null,"country":null},
-     *   "attributes":[
-     *     {"id":1,"name":"_id","unit":"<unknown>","updated_at":"2013-07-01 09:23:10","attributes_id":"urn:oc:attributeType:_id","value":1035192.0,"prev_value":1035193.0},
-     *     {"id":2,"name":"Container_Vejning_ID","unit":"<unknown>","updated_at":"2013-07-01 09:23:10","attributes_id":"urn:oc:attributeType:Container_Vejning_ID","value":1043507.0,"prev_value":1043508.0},
-     *     {"id":3,"name":"Indlaes_Vejning_ID","unit":"<unknown>","updated_at":"2013-07-01 09:23:10","attributes_id":"urn:oc:attributeType:Indlaes_Vejning_ID","value":2246347.0,"prev_value":2246348.0}
-     *     ]
-     * },
-     * "entities_type":null}]
+     * {
+     * "id":8063,
+     * "uuid":"urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1",
+     * "name":"urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1",
+     * "last_reading_at":"2015-11-12T06:06+0100",
+     * "provider":
+     *    {
+     *     "id":2,
+     *     "uuid":"urn:oc:entity:aarhus",
+     *     "username":"urn:oc:entity:aarhus",
+     *     "avatar":"http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",
+     *     "url":"https://en.wikipedia.org/wiki/Aarhus",
+     *     "joined_at":"",
+     *     "location":{"city":"Aarhus","country":"Danmark","country_code":"DK"},
+     *     "device_ids":null
+     *    },
+     * "data":
+     *    {
+     *      "recorded_at":"2015-11-12T06:06+0100",
+     *      "location":{"latitude":56.12,"longitude":10.2,"city":null,"country_code":null,"country":null},
+     *      "attributes":
+     *          [
+     *             {
+     *                 "id":1,
+     *                 "name":"_id",
+     *                 "unit":"<unknown>",
+     *                 "updated_at":"2013-07-01 09:23:10",
+     *                 "attributes_id":"urn:oc:attributeType:_id",
+     *                 "value":1035192.0,
+     *                 "prev_value":1035193.0
+     *              },
+     *              {
+     *                 "id":2,
+     *                 "name":"Container_Vejning_ID",
+     *                 "unit":"<unknown>",
+     *                 "updated_at":"2013-07-01 09:23:10",
+     *                 "attributes_id":"urn:oc:attributeType:Container_Vejning_ID",
+     *                 "value":1043507.0,
+     *                 "prev_value":1043508.0},
+     *              {
+     *                 "id":3,"name":"Indlaes_Vejning_ID","unit":"<unknown>","updated_at":"2013-07-01 09:23:10","attributes_id":"urn:oc:attributeType:Indlaes_Vejning_ID","value":2246347.0,
+     *                 "prev_value":2246348.0
+     *              }
+     *           ]
+     *     },
+     * "entities_type":null
+     * }
+     * ]
      */
     
     @GET

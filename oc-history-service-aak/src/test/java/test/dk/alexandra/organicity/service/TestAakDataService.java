@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ public class TestAakDataService {
 	}
 
 	 @Test
-	  public void testServiceOutput() throws IOException {
+	  public void testServiceOutput() throws IOException, ParseException {
 	    AakDataService s = new AakDataService();
 	    CkanResponse ckan = new CkanResponse();
 	    ckan.success = true;

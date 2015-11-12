@@ -20,6 +20,7 @@ public class DeviceOwner implements Serializable {
     public DeviceOwner(int id, String uuid, String username, String avatar, String url, 
     		String joind_at, Location location) {
     	this.id = id;
+    	this.uuid = uuid;
     	this.username = username;
     	this.avatar = avatar;
     	this.url= url;

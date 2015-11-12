@@ -1,6 +1,7 @@
 package dk.alexandra.organicity.service;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,7 @@ public class AakDataService {
    * @return
    */
   private DeviceOwner getAarhusOwner() {
-    return new DeviceOwner(2, "urn:oc:entity:aarhus","urn:oc:entity:aarhus", 
+    return new DeviceOwner(2, "urn:oc:entity:aarhus","Aarhus", 
         "http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",  "https://en.wikipedia.org/wiki/Aarhus",
         "",  new Location("Aarhus", "Danmark", "DK"));
   }
@@ -83,7 +84,14 @@ public class AakDataService {
         String name = provider.uuid + source_uuid + ":" + id;
         Device device = new Device(id + 8062,  name, name);
         device.provider = provider;
-        DeviceData data = getLastMeasurement(source_uuid);
+        DeviceData data;
+        try
+        {
+          data = getLastMeasurement(source_uuid);
+        } catch (ParseException e)
+        {
+          throw new IOException("failed to parse input from the CKAN server", e);  //we choose to resend the parseexception as an IOException. That we cannot parse the input is an "I/O" exception
+        }
         if (data!=null)
           device.last_reading_at = data.recorded_at;
         device.data = data;
@@ -125,8 +133,9 @@ public class AakDataService {
    * @param source_uuid
    * @return
    * @throws IOException
+   * @throws ParseException 
    */
-  private DeviceData getLastMeasurement(String source_uuid) throws IOException {
+  private DeviceData getLastMeasurement(String source_uuid) throws IOException, ParseException {
     long start = System.currentTimeMillis();
     //CkanResponse ckan =  getCkanResponse(getUrl(source_uuid, 0, 2));
     CkanResponse ckan =  getTestCkanResponse();
@@ -191,8 +200,9 @@ public class AakDataService {
    * @param ckan
    * @return
    * @throws IOException
+   * @throws ParseException 
    */
-  public DeviceData getLastMeasurementImpl(CkanResponse ckan) throws IOException {
+  public DeviceData getLastMeasurementImpl(CkanResponse ckan) throws IOException, ParseException {
     if (ckan==null || ckan.result == null || ckan.result.records==null || ckan.result.fields==null)
       throw new IOException("Missing fields in CKAN response - cannot form organicity response");
     DataLocation loc = new DataLocation(56.12, 10.2); //TODO: these values are hardcoded for now
@@ -263,10 +273,10 @@ public class AakDataService {
 
   }
   
-  private String formatDate(String date, String time) {
+  private String formatDate(String date, String time) throws ParseException {
     if (date==null || time==null)
       throw new RuntimeException("Cannot format date with empty string");
-    return date.substring(0,11) + time;
+    return DateFormatter.formatToOrganicityDate(date.substring(0,11) + time);
   }
 }
 /* example output that we should match from: http://explorer-api.organicity.smartcitizen.me:8090/v1/entities
