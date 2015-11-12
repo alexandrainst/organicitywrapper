@@ -1,4 +1,4 @@
-package dk.alexandra.organicity;
+package test.dk.alexandra.organicity;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import dk.alexandra.organicity.controller.Main;
 import dk.alexandra.organicity.model.organicity.Device;
+import dk.alexandra.organicity.service.AakDataService;
 
 public class ServiceTest {
 
@@ -41,6 +42,7 @@ public class ServiceTest {
         // c.configuration().enable(new org.glassfish.jersey.media.json.JsonJaxbFeature());
 
         target = c.target(Main.BASE_URI);
+        AakDataService.USE_DEMO_DATA = true;
     }
 
     @After

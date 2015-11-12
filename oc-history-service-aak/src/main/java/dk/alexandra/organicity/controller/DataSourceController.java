@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import dk.alexandra.organicity.model.organicity.Device;
+import dk.alexandra.organicity.service.AakCkanService;
 import dk.alexandra.organicity.service.AakDataService;
 
 /**
@@ -38,70 +39,116 @@ public class DataSourceController {
     @Path("/entities")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDataSources() throws IOException {
-      AakDataService service = new AakDataService();
+      AakDataService service = AakDataService.createService();
       List<Device> devices = service.getEntities();
       ObjectMapper m = new ObjectMapper();
       return m.writeValueAsString(devices);
     }
     //TODO:
     //get correct data from ODAA
-    //why are there only 3 attributes - check your conversion alg
-    //refactor service comp too big
     //add javadoc to all public facing functions
     //cache?
     //tomcat deployment?
-    //Z in timestamps - (java means output timezone, but this is not what OC does)
-    //is the initial [ ok in the output?
+    //nice-to-have: remove warnings
     /* Example output
      * [
-     * {
-     * "id":8063,
-     * "uuid":"urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1",
-     * "name":"urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1",
-     * "last_reading_at":"2015-11-12T06:06+0100",
-     * "provider":
-     *    {
-     *     "id":2,
-     *     "uuid":"urn:oc:entity:aarhus",
-     *     "username":"urn:oc:entity:aarhus",
-     *     "avatar":"http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",
-     *     "url":"https://en.wikipedia.org/wiki/Aarhus",
-     *     "joined_at":"",
-     *     "location":{"city":"Aarhus","country":"Danmark","country_code":"DK"},
-     *     "device_ids":null
-     *    },
-     * "data":
-     *    {
-     *      "recorded_at":"2015-11-12T06:06+0100",
-     *      "location":{"latitude":56.12,"longitude":10.2,"city":null,"country_code":null,"country":null},
-     *      "attributes":
-     *          [
-     *             {
-     *                 "id":1,
-     *                 "name":"_id",
-     *                 "unit":"<unknown>",
-     *                 "updated_at":"2013-07-01 09:23:10",
-     *                 "attributes_id":"urn:oc:attributeType:_id",
-     *                 "value":1035192.0,
-     *                 "prev_value":1035193.0
-     *              },
-     *              {
-     *                 "id":2,
-     *                 "name":"Container_Vejning_ID",
-     *                 "unit":"<unknown>",
-     *                 "updated_at":"2013-07-01 09:23:10",
-     *                 "attributes_id":"urn:oc:attributeType:Container_Vejning_ID",
-     *                 "value":1043507.0,
-     *                 "prev_value":1043508.0},
-     *              {
-     *                 "id":3,"name":"Indlaes_Vejning_ID","unit":"<unknown>","updated_at":"2013-07-01 09:23:10","attributes_id":"urn:oc:attributeType:Indlaes_Vejning_ID","value":2246347.0,
-     *                 "prev_value":2246348.0
-     *              }
-     *           ]
-     *     },
-     * "entities_type":null
-     * }
-     * ]
+    {
+        "data": {
+            "attributes": [
+                {
+                    "attributes_id": "urn:oc:attributeType:_id",
+                    "id": 1,
+                    "name": "_id",
+                    "prev_value": 1035193.0,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 1035192.0
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:Container_Vejning_ID",
+                    "id": 2,
+                    "name": "Container_Vejning_ID",
+                    "prev_value": 1043508.0,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 1043507.0
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:Indlaes_Vejning_ID",
+                    "id": 3,
+                    "name": "Indlaes_Vejning_ID",
+                    "prev_value": 2246348.0,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 2246347.0
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:Vejning",
+                    "id": 4,
+                    "name": "Vejning",
+                    "prev_value": 20.0,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 9.5
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:GPSLongitude_2",
+                    "id": 5,
+                    "name": "GPSLongitude_2",
+                    "prev_value": 10.029999732971191,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 10.180000305175781
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:GPSLatitude_2",
+                    "id": 6,
+                    "name": "GPSLatitude_2",
+                    "prev_value": 56.209999084472656,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 56.16999816894531
+                },
+                {
+                    "attributes_id": "urn:oc:attributeType:FrivaegtKg",
+                    "id": 7,
+                    "name": "FrivaegtKg",
+                    "prev_value": 0.0,
+                    "unit": "<unknown>",
+                    "updated_at": "2013-07-01T07:23Z",
+                    "value": 0.0
+                }
+            ],
+            "location": {
+                "city": null,
+                "country": null,
+                "country_code": null,
+                "latitude": 56.12,
+                "longitude": 10.2
+            },
+            "recorded_at": "2015-11-12T13:31Z"
+        },
+        "entities_type": null,
+        "id": 8063,
+        "last_reading_at": "2015-11-12T13:31Z",
+        "name": "urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1",
+        "provider": {
+            "avatar": "http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",
+            "device_ids": null,
+            "id": 2,
+            "joined_at": "",
+            "location": {
+                "city": "Aarhus",
+                "country": "Danmark",
+                "country_code": "DK"
+            },
+            "url": "https://en.wikipedia.org/wiki/Aarhus",
+            "username": "Aarhus",
+            "uuid": "urn:oc:entity:aarhus"
+        },
+        "uuid": "urn:oc:entity:aarhus76d1ee61-8062-42d9-b417-fac75998f5c3:1"
+    }
+]
      */
     
     @GET

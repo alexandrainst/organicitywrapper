@@ -60,10 +60,11 @@ public class TestJson {
 	@Test
 	public void testList2Json() throws JsonGenerationException, JsonMappingException, IOException, ParseException {
 	  List<Device> list = new ArrayList<Device>();
-	  AakDataService s = new AakDataService();
+	  AakDataService.USE_DEMO_DATA = true;
+	  AakDataService s = AakDataService.createService();
     
 	  Device d = new Device(1, "1", "1");
-	  d.data = s.getLastMeasurementImpl(s.getTestCkanResponse());
+	  d.data = s.getLastMeasurement("");
 	  list.add(d);
 	  ObjectMapper mapper = new ObjectMapper();
     String js = mapper.writeValueAsString(list);
