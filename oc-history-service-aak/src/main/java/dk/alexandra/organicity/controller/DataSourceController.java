@@ -1,6 +1,7 @@
 package dk.alexandra.organicity.controller;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -12,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import dk.alexandra.organicity.model.organicity.Device;
-import dk.alexandra.organicity.service.AakCkanService;
 import dk.alexandra.organicity.service.AakDataService;
 
 /**
@@ -39,15 +39,21 @@ public class DataSourceController {
     @Path("/entities")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDataSources() throws IOException {
+      try {
       AakDataService service = AakDataService.createService();
       List<Device> devices = service.getEntities();
       ObjectMapper m = new ObjectMapper();
       return m.writeValueAsString(devices);
+      } catch (Exception e) {
+        System.out.println("Exception in getDataSources: " + e.getMessage());
+        throw new IOException("Exception in getDataSources: " + e.getMessage(), e);
+      }
     }
     //TODO:
+    //fix missing attributes
     //get correct data from ODAA
     //add javadoc to all public facing functions
-    //cache?
+    //cache! Redis?
     //tomcat deployment?
     //nice-to-have: remove warnings
     /* Example output

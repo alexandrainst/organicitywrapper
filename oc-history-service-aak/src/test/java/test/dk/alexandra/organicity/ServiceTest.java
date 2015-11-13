@@ -42,7 +42,7 @@ public class ServiceTest {
         // c.configuration().enable(new org.glassfish.jersey.media.json.JsonJaxbFeature());
 
         target = c.target(Main.BASE_URI);
-        AakDataService.USE_DEMO_DATA = true;
+        AakDataService.USE_DEMO_DATA = false;
     }
 
     @After

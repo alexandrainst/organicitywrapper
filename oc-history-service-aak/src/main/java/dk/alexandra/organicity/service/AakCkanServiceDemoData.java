@@ -11,7 +11,7 @@ import dk.alexandra.organicity.model.ckan.Result;
 
 public class AakCkanServiceDemoData extends AakCkanService {
 	  public CkanResponse getCkanEntities() throws IOException {
-		    return super.getCkanResponse(getUrl("_table_metadata", 0, 200));
+		    return super.getCkanResponse(getUrl("_table_metadata", 0, 200, null, null));
 		  }
 
 	  public CkanResponse getCkanResponse(String url) throws IOException {

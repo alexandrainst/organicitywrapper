@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import dk.alexandra.organicity.model.ckan.CkanResponse;
 import dk.alexandra.organicity.util.GetJson;
 
-//​49004 http://www.odaa.dk/api/action/datastore_search?resource_id=76d1ee61-8062-42d9-b417-fac75998f5c3&filters={"GPSLongitude_2": 10.22, "GPSLatitude_2": 56.23}
+//​49004 http://www.odaa.dk/api/action/datastore_search?resource_id=76d1ee61-8062-42d9-b417-fac75998f5c3&filters={"GPSLongitude_2": 10.22, "GPSLatitude_2": 56.23}&sort=Opd_Dato desc
 //​488574 http://www.odaa.dk/api/action/datastore_search?resource_id=76d1ee61-8062-42d9-b417-fac75998f5c3&filters={"GPSLongitude_2": ​10.22}
 public class AakCkanService {
 	/**
@@ -30,9 +30,13 @@ public class AakCkanService {
 	   * @param limit
 	   * @return
 	   */
-	  public String getUrl(String resourceId, int offset, int limit) {
+	  public String getUrl(String resourceId, int offset, int limit, String jsonFilters, String sort) {
 	    String s = getUrl(resourceId);
 	    s += "&offset=" + offset + "&limit=" + limit;
+	    if (jsonFilters!=null)
+	      s+= "&filters="+jsonFilters;
+	    if (sort!=null)
+	      s+="&sort="+sort;
 	    //System.out.println(s);
 	    return s;
 	  }
@@ -62,7 +66,7 @@ public class AakCkanService {
 	   * @throws IOException
 	   */
 	  public CkanResponse getCkanEntities() throws IOException {
-	    return getCkanResponse(getUrl("_table_metadata", 0, 200));
+	    return getCkanResponse(getUrl("_table_metadata", 0, 200, null,null)); //200 is hardcoded
 	  }
 
 }
