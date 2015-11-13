@@ -24,203 +24,241 @@ import dk.alexandra.organicity.util.DateFormatter;
  *
  */
 public class AakDataService {
-  AakCkanService ckanService; //Used for getting data from (the Aarhus) Ckan
+	AakCkanService ckanService; //Used for getting data from (the Aarhus) Ckan
 
-  public AakDataService(AakCkanService ckanService) {
-    setCkanService(ckanService);
-  }
+	public AakDataService(AakCkanService ckanService) {
+		setCkanService(ckanService);
+	}
 
-  public void setCkanService(AakCkanService ckanService) {
-    this.ckanService = ckanService;
-  }
-  /**
-   * A utility function that generates a default "Aarhus" owner for all data sources. To be used when generating 
-   * the Organicity response
-   * @return
-   */
-  private DeviceOwner getAarhusOwner() {
-    return new DeviceOwner(2, "urn:oc:entity:aarhus","Aarhus", 
-        "http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",  "https://en.wikipedia.org/wiki/Aarhus",
-        "",  new Location("Aarhus", "Danmark", "DK"));
-  }
+	public void setCkanService(AakCkanService ckanService) {
+		this.ckanService = ckanService;
+	}
+	/**
+	 * A utility function that generates a default "Aarhus" owner for all data sources. To be used when generating 
+	 * the Organicity response
+	 * @return
+	 */
+	private DeviceOwner getAarhusOwner() {
+		return new DeviceOwner(2, "urn:oc:entity:aarhus","Aarhus", 
+				"http://cliparts.co/cliparts/LTd/jL4/LTdjL4djc.jpg",  "https://en.wikipedia.org/wiki/Aarhus",
+				"",  new Location("Aarhus", "Danmark", "DK"));
+	}
 
-  /**
-   * Gets the list of entities (data sources/resouces) from the Aarhus CKAN and reformats those into the Organicity format
-   * @return
-   * @throws IOException
-   * @throws ParseException 
-   */
-  public List<Device> getEntities() throws IOException, ParseException {
-    CkanResponse response = ckanService.getCkanResponse(ckanService.getUrl(Record.SourceUuid, 0, 50, null, Record.FieldName.Opd_Dato + " Desc"));
-    Map<String, Record> sources = new HashMap<String, Record>();
-    for (Map<String, Object> rec : response.result.records) {
-      Record record = new Record(rec);
-      if (sources.containsKey(record.getKey()))
-        record = sources.get(record.getKey());
-      else
-        sources.put(record.getKey(), record);
-      record.updateMeasurements(rec);
-    }
+	/**
+	 * Gets the list of entities (data sources/resouces) from the Aarhus CKAN and reformats those into the Organicity format
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException 
+	 */
+	public List<Device> getEntities() throws IOException, ParseException {
+		CkanResponse response = ckanService.getCkanResponse(ckanService.getUrl(AakRecycleDataSource.SourceUuid, 0, 50, null, AakRecycleDataSource.FieldName.Opd_Dato + " Desc"));
+		Map<String, AakRecycleDataSource> sources = new HashMap<String, AakRecycleDataSource>();
+		for (Map<String, Object> rec : response.result.records) {
+			AakRecycleDataSource record = new AakRecycleDataSource(rec);
+			if (sources.containsKey(record.getKey()))
+				record = sources.get(record.getKey());
+			else
+				sources.put(record.getKey(), record);
+			record.updateMeasurements(rec);
+		}
 
-    List<Device> res = new ArrayList<Device>();
-    int id = 1;
-    for (Record record : sources.values()) {
-      DeviceOwner provider = getAarhusOwner();
-      String name = provider.uuid + Record.SourceUuid + ":" + record.getKey();
-      Device device = new Device(id + Record.SourceUuidOffset,  name, name);
-      device.provider = provider;
-      DeviceData data;
-      data = getLastMeasurement(record);
-      if (data!=null)
-        device.last_reading_at = data.recorded_at;
-      device.data = data;
-      res.add(device);
-      id++;
-    }
-    return res;
-  }
+		List<Device> res = new ArrayList<Device>();
+		int id = 1;
+		for (AakRecycleDataSource record : sources.values()) {
+			DeviceOwner provider = getAarhusOwner();
+			String name = provider.uuid + AakRecycleDataSource.SourceUuid + ":" + record.getKey();
+			Device device = new Device(id + AakRecycleDataSource.SourceUuidOffset,  name, name);
+			device.provider = provider;
+			DeviceData data;
+			data = getLastMeasurement(record);
+			if (data!=null)
+				device.last_reading_at = data.recorded_at;
+			device.data = data;
+			res.add(device);
+			id++;
+		}
+		return res;
+	}
 
-  private DeviceData getLastMeasurement(Record record) throws ParseException
-  {
-    DataLocation loc = new DataLocation(record.latitude, record.longitude);
-    DeviceData res = new DeviceData(DateFormatter.getCurrentTime(), loc);
+	private DeviceData getLastMeasurement(AakRecycleDataSource record) throws ParseException
+	{
+		DataLocation loc = new DataLocation(record.latitude, record.longitude);
+		DeviceData res = new DeviceData(DateFormatter.getCurrentTime(), loc);
 
-    Map<String, Object> lastMeasurement = record.lastMeasurements;
-    Map<String, Object> lastLastMeasurement = record.lastLastMeasurements;
+		Map<String, Object> lastMeasurement = record.lastMeasurements;
+		Map<String, Object> lastLastMeasurement = record.lastLastMeasurements;
 
-    int fieldId = 1;
-    for (Record.FieldName f : Record.FieldName.values()) {
-      DeviceSensor d = new DeviceSensor();
-      d.id = fieldId;
-      d.name = f.toString();
-      d.unit = "<unknown>";
-      d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
-      d.attributes_id = "urn:oc:attributeType:" + f;
-      Object o = lastMeasurement.get(f);
-      Double value = convertDouble(o);
-      if (value==null)
-        continue;
-      d.value = value;
-      if (lastLastMeasurement!=null) {
-        value = convertDouble(lastLastMeasurement.get(f));
-        if (value!=null)
-          d.prev_value = value;  //lastlast parsing to null is not considered an exception
-      }
-      res.attributes.add(d);
-      fieldId++;
-    }
-    return res;
-  }
+		int fieldId = 1;
+		for (AakRecycleDataSource.FieldName f : AakRecycleDataSource.FieldName.values()) {
+			DeviceSensor d = new DeviceSensor();
+			d.id = fieldId;
+			d.name = f.toString();
+			d.unit = "<unknown>";
+			d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
+			d.attributes_id = "urn:oc:attributeType:" + f;
+			Object o = lastMeasurement.get(f.toString());
+			Double value = convertDouble(o);
+			if (value==null)
+				continue;
+			d.value = value;
+			if (lastLastMeasurement!=null) {
+				value = convertDouble(lastLastMeasurement.get(f));
+				if (value!=null)
+					d.prev_value = value;  //lastlast parsing to null is not considered an exception
+			}
+			res.attributes.add(d);
+			fieldId++;
+		}
+		return res;
+	}
 
-  /**
-   * Helper function that takes a resourceId and returns the last two measurements in the data stream for this resourceId
-   * The Organicity API expects this measurements in the list of data sources.
-   * 
-   * @param source_uuid
-   * @return
-   * @throws IOException
-   * @throws ParseException 
-   */
-  public DeviceData getLastMeasurement(String source_uuid) throws IOException, ParseException {
-    long start = System.currentTimeMillis();
-    CkanResponse ckan =  ckanService.getCkanResponse(ckanService.getUrl(source_uuid, 0, 2, null, null));
-    System.out.println("CKAN response in: " + ((double) (System.currentTimeMillis() -start)/1000));
-    return getLastMeasurementImpl(ckan);
-  }
+	/**
+	 * Helper function that takes a resourceId and returns the last two measurements in the data stream for this resourceId
+	 * The Organicity API expects this measurements in the list of data sources.
+	 * 
+	 * @param source_uuid
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException 
+	 */
+	public DeviceData getLastMeasurement(String source_uuid) throws IOException, ParseException {
+		long start = System.currentTimeMillis();
+		CkanResponse ckan =  ckanService.getCkanResponse(ckanService.getUrl(source_uuid, 0, 2, null, null));
+		System.out.println("CKAN response in: " + ((double) (System.currentTimeMillis() -start)/1000));
+		return getLastMeasurementImpl(ckan);
+	}
 
-  /**
-   * Internal impl to getLastMeasurement.
-   * 
-   * @param ckan
-   * @return
-   * @throws IOException
-   * @throws ParseException 
-   */
-  private DeviceData getLastMeasurementImpl(CkanResponse ckan) throws IOException, ParseException {
-    if (ckan==null || ckan.result == null || ckan.result.records==null || ckan.result.fields==null)
-      throw new IOException("Missing fields in CKAN response - cannot form organicity response");
-    DataLocation loc = new DataLocation(56.12, 10.2); //TODO: these values are hardcoded for now
-    DeviceData res = new DeviceData(DateFormatter.getCurrentTime(), loc);
+	/**
+	 * Internal impl to getLastMeasurement.
+	 * 
+	 * @param ckan
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException 
+	 */
+	private DeviceData getLastMeasurementImpl(CkanResponse ckan) throws IOException, ParseException {
+		if (ckan==null || ckan.result == null || ckan.result.records==null || ckan.result.fields==null)
+			throw new IOException("Missing fields in CKAN response - cannot form organicity response");
+		DataLocation loc = new DataLocation(56.12, 10.2); //TODO: these values are hardcoded for now
+		DeviceData res = new DeviceData(DateFormatter.getCurrentTime(), loc);
 
-    Map<String, Object> lastMeasurement = new HashMap<String, Object>();
-    Map<String, Object> lastLastMeasurement = new HashMap<String, Object>();
-    if (ckan.result.records.size()>1)
-      lastLastMeasurement = ckan.result.records.get(1); 
-    if (ckan.result.records.size()>0)
-      lastMeasurement = ckan.result.records.get(0);
-    else
-      throw new IOException("Expected at least one measurement, found none - aborting"); //we cannot know data type if there are no measurements
+		Map<String, Object> lastMeasurement = new HashMap<String, Object>();
+		Map<String, Object> lastLastMeasurement = new HashMap<String, Object>();
+		if (ckan.result.records.size()>1)
+			lastLastMeasurement = ckan.result.records.get(1); 
+		if (ckan.result.records.size()>0)
+			lastMeasurement = ckan.result.records.get(0);
+		else
+			throw new IOException("Expected at least one measurement, found none - aborting"); //we cannot know data type if there are no measurements
 
-    int fieldId = 1;
-    for (Field f : ckan.result.fields) {
-      DeviceSensor d = new DeviceSensor();
-      d.id = fieldId;
-      d.name = f.id;
-      d.unit = "<unknown>";
-      d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
-      d.attributes_id = "urn:oc:attributeType:" + f.id;
-      Object o = lastMeasurement.get(f.id);
-      Double value = convertDouble(o);
-      if (value==null)
-        continue;
-      d.value = value;
-      if (lastLastMeasurement!=null) {
-        value = convertDouble(lastLastMeasurement.get(f.id));
-        if (value!=null)
-          d.prev_value = value;  //lastlast parsing to null is not considered an exception
-      }
-      res.attributes.add(d);
-      fieldId++;
-    }
-    return res;
-  }
+		int fieldId = 1;
+		for (Field f : ckan.result.fields) {
+			DeviceSensor d = new DeviceSensor();
+			d.id = fieldId;
+			d.name = f.id;
+			d.unit = "<unknown>";
+			d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
+			d.attributes_id = "urn:oc:attributeType:" + f.id;
+			Object o = lastMeasurement.get(f.id);
+			Double value = convertDouble(o);
+			if (value==null)
+				continue;
+			d.value = value;
+			if (lastLastMeasurement!=null) {
+				value = convertDouble(lastLastMeasurement.get(f.id));
+				if (value!=null)
+					d.prev_value = value;  //lastlast parsing to null is not considered an exception
+			}
+			res.attributes.add(d);
+			fieldId++;
+		}
+		return res;
+	}
 
-  /**
-   * Tries to convert attribute value (string) to an integer/double - returns null if fails
-   * @param val
-   * @return
-   */
-  private Double convertDouble(Object o)  
-  {
-    Double res = null;
-    if (o==null)
-      return null;
-    if (o instanceof Integer)
-      res = new Double((Integer) o);
-    else if (o instanceof Double)
-      res = (Double) o;
-    else if (o instanceof Float)
-      res = new Double((Float) o);
-    else if (o instanceof String) {
-      String val = (String) o;
-      val = val.replaceAll(" \"'", "");
-      try
-      {
-        res = Double.parseDouble(val);
-      }
-      catch (NumberFormatException nfe)
-      {
-      }
-    }
-    else {
-      //unknown object type
-    }
-    return res;
+	/**
+	 * Tries to convert attribute value (string) to an integer/double - returns null if fails
+	 * @param val
+	 * @return
+	 */
+	private Double convertDouble(Object o)  
+	{
+		Double res = null;
+		if (o==null)
+			return null;
+		if (o instanceof Integer)
+			res = new Double((Integer) o);
+		else if (o instanceof Double)
+			res = (Double) o;
+		else if (o instanceof Float)
+			res = new Double((Float) o);
+		else if (o instanceof String) {
+			String val = (String) o;
+			val = val.replaceAll(" \"'", "");
+			try
+			{
+				res = Double.parseDouble(val);
+			}
+			catch (NumberFormatException nfe)
+			{
+			}
+		}
+		else {
+			//unknown object type
+		}
+		return res;
 
-  }
+	}
 
-  private String formatDate(String date, String time) throws ParseException {
-    if (date==null || time==null)
-      throw new RuntimeException("Cannot format date with empty string");
-    return DateFormatter.formatToOrganicityDate(date.substring(0,11) + time);
-  }
+	private String formatDate(String date, String time) throws ParseException {
+		if (date==null || time==null)
+			throw new RuntimeException("Cannot format date with empty string");
+		return DateFormatter.formatToOrganicityDate(date.substring(0,11) + time);
+	}
 
-  public static boolean USE_DEMO_DATA = false;
-  public static AakDataService createService() {
-    if (USE_DEMO_DATA)
-      return new AakDataService(new AakCkanServiceDemoData());
-    return new AakDataService(new AakCkanService());
-  }
+	public static boolean USE_DEMO_DATA = false;
+	public static AakDataService createService() {
+		if (USE_DEMO_DATA)
+			return new AakDataService(new AakCkanServiceDemoData());
+		return new AakDataService(new AakCkanService());
+	}
+
+	public Device getDevice(List<Device> devices, long deviceId) {
+		if (devices == null)
+			return null;
+		for (Device d : devices)
+			if (d.id == deviceId)
+				return d;
+		return null;
+	}
+
+	public DeviceSensor getDeviceAttribute(Device d, int attribute_id) {
+		if (d.data==null)
+			return null;
+
+		List<DeviceSensor> attributes = d.data.attributes;
+		for (DeviceSensor a : attributes) {
+			if (a.id == attribute_id)
+				return a;
+		}
+		return null;
+	}
+
+	public void getReadings(Device d, DeviceSensor attribute) throws IOException {
+		String u = d.uuid;
+		int i = u.lastIndexOf(':');
+		i = u.lastIndexOf(':',i-1);
+		String key = u.substring(i+1);
+		String longitude = AakRecycleDataSource.getLongitudeFromKey(key);
+		String latitude = AakRecycleDataSource.getLatitudeFromKey(key);
+		String url = ckanService.getUrl(
+				AakRecycleDataSource.SourceUuid, 0, 200, 
+				"{\"" + AakRecycleDataSource.FieldName.GPSLongitude_2.toString() + 
+				"\": " + longitude + ", \"" + AakRecycleDataSource.FieldName.GPSLatitude_2.toString() + "\": " + latitude + "}", 
+				AakRecycleDataSource.FieldName.Opd_Dato.toString() + " desc");
+		System.out.println("getReadings url: " + url);
+		CkanResponse ckan = ckanService.getCkanResponse(url);
+		//TODO:return readings in OC format
+	}
 }
 /* example output that we should match from: http://explorer-api.organicity.smartcitizen.me:8090/v1/entities
  *

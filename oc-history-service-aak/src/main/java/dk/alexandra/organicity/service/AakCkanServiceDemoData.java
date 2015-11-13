@@ -41,7 +41,7 @@ public class AakCkanServiceDemoData extends AakCkanService {
 	    Map<String,Object> r = new HashMap<String,Object>();
 	    r.put("Opd_Init", "SYSRS");
 	    r.put("Container_Vejning_ID", new Integer(1043507));
-	    r.put("GPSLongitude_2", new Float(10.18));
+	    r.put("GPSLongitude_2", new Double(10.18));
 	    r.put("Indlaes_Vejning_ID", new Integer(2246347));
 	    r.put("Opd_Dato", "2013-07-01 00:00:00.0");
 	    r.put("Dato", "2013-07-01 00:00:00.0");      
@@ -50,12 +50,12 @@ public class AakCkanServiceDemoData extends AakCkanService {
 	    r.put("Vejning", new Float(9.5));      
 	    r.put("_id", new Integer(1035192));            
 	    r.put("FrivaegtKg", new Float(0.0));
-	    r.put("GPSLatitude_2", new Float(56.17));
+	    r.put("GPSLatitude_2", new Double(56.17));
 	    ckan.result.records.add(r);
 	    r = new HashMap<String,Object>();
 	    r.put("Opd_Init", "SYSRS");
 	    r.put("Container_Vejning_ID", new Integer(1043508));
-	    r.put("GPSLongitude_2", new Float(10.03));
+	    r.put("GPSLongitude_2", new Double(10.03));
 	    r.put("Indlaes_Vejning_ID", new Integer(2246348));
 	    r.put("Opd_Dato", "2013-07-01 00:00:00.0");
 	    r.put("Dato", "2013-07-01 00:00:00.0");      
@@ -64,7 +64,7 @@ public class AakCkanServiceDemoData extends AakCkanService {
 	    r.put("Vejning", new Float(20.0));      
 	    r.put("_id", new Integer(1035193));            
 	    r.put("FrivaegtKg", new Float(0.0));
-	    r.put("GPSLatitude_2", new Float(56.21));
+	    r.put("GPSLatitude_2", new Double(56.21));
 	    ckan.result.records.add(r);
 	    return ckan;
 	  }

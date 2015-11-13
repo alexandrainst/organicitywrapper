@@ -1,6 +1,8 @@
 package dk.alexandra.organicity.service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -31,12 +33,17 @@ public class AakCkanService {
 	   * @return
 	   */
 	  public String getUrl(String resourceId, int offset, int limit, String jsonFilters, String sort) {
+	    final String UTF8_ENCODING = "UTF-8";
 	    String s = getUrl(resourceId);
+	    try {
 	    s += "&offset=" + offset + "&limit=" + limit;
 	    if (jsonFilters!=null)
-	      s+= "&filters="+jsonFilters;
+	      s+= "&filters="+URLEncoder.encode(jsonFilters, UTF8_ENCODING);
 	    if (sort!=null)
-	      s+="&sort="+sort;
+	      s+="&sort="+URLEncoder.encode(sort, UTF8_ENCODING);	    
+		} catch (UnsupportedEncodingException e) {
+			//"UTF-8 is always supported by java
+		}
 	    //System.out.println(s);
 	    return s;
 	  }
