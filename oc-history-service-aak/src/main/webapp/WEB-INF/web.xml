@@ -5,21 +5,16 @@
 <web-app>
 	<display-name>Aarhus Organicity Wrapper REST service</display-name>
 	<servlet>
-		<servlet-name>dk.alexandra.organicity.controller</servlet-name>
+		<servlet-name>dk.aarhus.organicity.controller</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-		<!-- <init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>dk.alexandra.organicity.controller</param-value>
-		</init-param>
-		-->
 		<init-param>
-        <param-name>javax.ws.rs.Application</param-name>
-        <param-value>dk.alexandra.organicity.controller.MyApplication</param-value>
-    </init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>dk.aarhus.organicity.controller.WebApplicationLauncher</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>dk.alexandra.organicity.controller</servlet-name>
-		<url-pattern>/rest/*</url-pattern>
+		<servlet-name>dk.aarhus.organicity.controller</servlet-name>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 </web-app>
