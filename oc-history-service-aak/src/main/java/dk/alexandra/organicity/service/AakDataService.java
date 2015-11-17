@@ -13,6 +13,7 @@ import dk.alexandra.organicity.model.organicity.DataLocation;
 import dk.alexandra.organicity.model.organicity.Device;
 import dk.alexandra.organicity.model.organicity.DeviceData;
 import dk.alexandra.organicity.model.organicity.DeviceOwner;
+import dk.alexandra.organicity.model.organicity.DeviceReadings;
 import dk.alexandra.organicity.model.organicity.DeviceSensor;
 import dk.alexandra.organicity.model.organicity.Location;
 import dk.alexandra.organicity.util.DateFormatter;
@@ -94,7 +95,7 @@ public class AakDataService {
 			d.id = fieldId;
 			d.name = f.toString();
 			d.unit = "<unknown>";
-			d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
+			d.updated_at = AakRecycleDataSource.getMeasurementDate(lastMeasurement);  
 			d.attributes_id = "urn:oc:attributeType:" + f;
 			Object o = lastMeasurement.get(f.toString());
 			Double value = convertDouble(o);
@@ -156,8 +157,8 @@ public class AakDataService {
 			DeviceSensor d = new DeviceSensor();
 			d.id = fieldId;
 			d.name = f.id;
-			d.unit = "<unknown>";
-			d.updated_at = formatDate((String) lastMeasurement.get("Opd_Dato"), (String) lastMeasurement.get("Tid"));  
+			d.unit = "<unknown>"; //TODO: is it possible to add measurement units?
+			d.updated_at = AakRecycleDataSource.getMeasurementDate(lastMeasurement);  
 			d.attributes_id = "urn:oc:attributeType:" + f.id;
 			Object o = lastMeasurement.get(f.id);
 			Double value = convertDouble(o);
@@ -209,12 +210,6 @@ public class AakDataService {
 
 	}
 
-	private String formatDate(String date, String time) throws ParseException {
-		if (date==null || time==null)
-			throw new RuntimeException("Cannot format date with empty string");
-		return DateFormatter.formatToOrganicityDate(date.substring(0,11) + time);
-	}
-
 	public static boolean USE_DEMO_DATA = false;
 	public static AakDataService createService() {
 		if (USE_DEMO_DATA)
@@ -243,7 +238,7 @@ public class AakDataService {
 		return null;
 	}
 
-	public void getReadings(Device d, DeviceSensor attribute) throws IOException {
+	public DeviceReadings getReadings(Device d, DeviceSensor attribute) throws IOException, ParseException {
 		String u = d.uuid;
 		int i = u.lastIndexOf(':');
 		i = u.lastIndexOf(':',i-1);
@@ -257,7 +252,17 @@ public class AakDataService {
 				AakRecycleDataSource.FieldName.Opd_Dato.toString() + " desc");
 		System.out.println("getReadings url: " + url);
 		CkanResponse ckan = ckanService.getCkanResponse(url);
-		//TODO:return readings in OC format
+		DeviceReadings readings = new DeviceReadings(d.id, attribute.id);
+		if (ckan.result.records!=null && ckan.result.records.size()>0) {
+		  readings.to = AakRecycleDataSource.getMeasurementDate(ckan.result.records.get(0));
+      readings.from = AakRecycleDataSource.getMeasurementDate(ckan.result.records.get(ckan.result.records.size()-1)); //last
+      for (Map<String,Object> reading : ckan.result.records) {
+        Double val = convertDouble(reading.get(attribute.name));
+        String date = AakRecycleDataSource.getMeasurementDate(reading);
+        readings.addReading(date, val);
+      }
+		} 
+		return readings;
 	}
 }
 /* example output that we should match from: http://explorer-api.organicity.smartcitizen.me:8090/v1/entities

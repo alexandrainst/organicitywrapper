@@ -52,4 +52,24 @@ public class DataSourceListUpdater implements Runnable {
 		Runnable worker = new DataSourceListUpdater();
 		executor.execute(worker);
 	}
+	
+	public static void initialize() {
+    SimpleCache.Element cache = SimpleCache.getCache().getElement(DataSourceController.DATA_SOURCE_CACHE_KEY);
+    if (cache!=null) //cache is initialized
+      return;
+    
+    SimpleCache c = SimpleCache.getCache();
+    boolean runUpdater = false;
+    synchronized (c) {
+      cache = c.getElement(DataSourceController.DATA_SOURCE_CACHE_KEY); //reaquire the cache inside the synchronized block
+      if (cache==null) { //if cache is not initialized
+        cache = new SimpleCache.Element(new ArrayList<Device>());
+        SimpleCache.getCache().addElement(DataSourceController.DATA_SOURCE_CACHE_KEY, cache); //now cache is init to empty cache
+        SimpleCache.getCache().doUpdate(cache); //mark for updating, we are going to update
+        runUpdater = true;
+      }
+    }
+    if (runUpdater)
+      DataSourceListUpdater.runUpdater();  //do not run the updater inside the synchronized block
+	}
 }
